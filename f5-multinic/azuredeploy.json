@@ -17,14 +17,14 @@
     },
     "dnsLabelPrefix": {
       "type": "string",
-      "defaultValue": "multinicvm",
+      "defaultValue": "f5multinicvm",
       "metadata": {
         "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
       }
     },
    "vmName": {
       "type": "string",
-      "defaultValue": "multinicvm",
+      "defaultValue": "f5multinicvm",
       "metadata": {
         "description": "Name of the VM"
       }
