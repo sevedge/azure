@@ -191,10 +191,10 @@
           {
             "name": "[concat('ipconfig', copyIndex(2))]",
             "properties": {
-              "privateIPAddress": "[concat('10.0.', (copyIndex(2)), '.4']",
+              "privateIPAddress": "[concat('10.0.', copyIndex(2), '.4')]",
               "privateIPAllocationMethod": "Static",
               "subnet": {
-                "id": "[concat('subnet', copyIndex(2)]"
+                "id": "[concat('subnet', copyIndex(2))]"
               }
             }
           }
