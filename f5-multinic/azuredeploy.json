@@ -72,7 +72,7 @@
     "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'samultinic')]",
     "storageAccountType": "Standard_LRS",
 
-    "nic1Name": "nic1",
+    "mgmt-nic": "mgmt-nic1",
 
     "vnetName": "vnet",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
@@ -155,11 +155,11 @@
         "[variables('publicIPAddressId')]"
       ],
       "location": "[resourceGroup().location]",
-      "name": "[variables('nic1Name')]",
+      "name": "[variables('mgmt-nic')]",
       "properties": {
         "ipConfigurations": [
           {
-            "name": "ipconfig1",
+            "name": "mgmt-ipconfig-1",
             "properties": {
               "privateIPAddress": "[variables('subnet1PrivateAddress')]",
               "privateIPAllocationMethod": "Static",
@@ -194,7 +194,7 @@
               "privateIPAddress": "[concat('10.0.', copyIndex(2), '.4')]",
               "privateIPAllocationMethod": "Static",
               "subnet": {
-                "id": "[concat('subnet', copyIndex(2))]"
+                "id": "[concat(variables('vnetId'), '/subnets/', 'subnet', copyIndex(2))]"
               }
             }
           }
@@ -206,7 +206,8 @@
       "apiVersion": "[variables('apiVersion')]",
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nic1Name'))]"
+        "[concat('Microsoft.Network/networkInterfaces/', variables('mgmt-nic'))]",
+        "interfacesLoop"
       ],
       "location": "[resourceGroup().location]",
       "name": "[parameters('vmName')]",
@@ -228,7 +229,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic1Name'))]",
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('mgmt-nic'))]",
               "properties": {
                 "primary": true
               }
