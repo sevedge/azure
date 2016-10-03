@@ -82,7 +82,7 @@
     
 
     "publicIPAddressName": "[concat(parameters('dnsLabelPrefix'), '-pip')]",
-    "publicIPAddressType": "Static",
+    "publicIPAddressType": "Dynamic",
     "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
 
   },
@@ -150,8 +150,7 @@
           {
             "name": "ipconfig1",
             "properties": {
-              "privateIPAddress": "[variables('subnet1PrivateAddress')]",
-              "privateIPAllocationMethod": "Static",
+              "privateIPAllocationMethod": "Dynamic",
               "PublicIpAddress": {
                 "Id": "[variables('publicIPAddressId')]"
               },
@@ -176,8 +175,7 @@
           {
             "name": "ipconfig2",
             "properties": {
-              "privateIPAddress": "[variables('subnet2PrivateAddress')]",
-              "privateIPAllocationMethod": "Static",
+              "privateIPAllocationMethod": "Dynamic",
               "subnet": {
                 "id": "[variables('subnet2Id')]"
               }
