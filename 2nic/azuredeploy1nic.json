@@ -17,14 +17,14 @@
     },
     "dnsLabelPrefix": {
       "type": "string",
-      "defaultValue": "f52nic",
+      "defaultValue": "f52nic1nic",
       "metadata": {
         "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
       }
     },
    "vmName": {
       "type": "string",
-      "defaultValue": "f52nic",
+      "defaultValue": "f52nic1nic",
       "metadata": {
         "description": "Name of the VM"
       }
@@ -79,9 +79,10 @@
     "subnet2Id": "[concat(variables('vnetId'), '/subnets/', variables('subnet2Name'))]",
     "subnet2Prefix": "10.0.2.0/24",
     "subnet2PrivateAddress": "10.0.2.5",
+    
 
     "publicIPAddressName": "[concat(parameters('dnsLabelPrefix'), '-pip')]",
-    "publicIPAddressType": "Static",
+    "publicIPAddressType": "Dynamic",
     "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
 
   },
@@ -111,12 +112,6 @@
             "name": "[variables('subnet1Name')]",
             "properties": {
               "addressPrefix": "[variables('subnet1Prefix')]"
-            }
-          },
-          {
-            "name": "[variables('subnet2Name')]",
-            "properties": {
-              "addressPrefix": "[variables('subnet2Prefix')]"
             }
           }
         ]
@@ -149,8 +144,7 @@
           {
             "name": "ipconfig1",
             "properties": {
-              "privateIPAddress": "[variables('subnet1PrivateAddress')]",
-              "privateIPAllocationMethod": "Static",
+              "privateIPAllocationMethod": "Dynamic",
               "PublicIpAddress": {
                 "Id": "[variables('publicIPAddressId')]"
               },
@@ -163,35 +157,11 @@
       }
     },
     {
-      "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "[variables('apiVersion')]",
-      "dependsOn": [
-        "[variables('vnetId')]"
-      ],
-      "location": "[resourceGroup().location]",
-      "name": "[variables('nic2Name')]",
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig2",
-            "properties": {
-              "privateIPAddress": "[variables('subnet2PrivateAddress')]",
-              "privateIPAllocationMethod": "Static",
-              "subnet": {
-                "id": "[variables('subnet2Id')]"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
       "type": "Microsoft.Compute/virtualMachines",
       "apiVersion": "[variables('apiVersion')]",
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nic1Name'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nic2Name'))]"
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nic1Name'))]"
       ],
       "location": "[resourceGroup().location]",
       "name": "[parameters('vmName')]",
@@ -216,12 +186,6 @@
               "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic1Name'))]",
               "properties": {
                 "primary": true
-              }
-            },
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic2Name'))]",
-              "properties": {
-                "primary": false
               }
             }
           ]
