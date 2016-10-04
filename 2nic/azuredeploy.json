@@ -251,7 +251,7 @@
     },
     { 
        "type": "Microsoft.Compute/virtualMachines/extensions", 
-       "name": "[concat(variables('vmName'),'/startup')]", 
+       "name": "[concat(parameters('vmName'),'/startup')]", 
        "apiVersion": "2015-06-15", 
        "location": "[variables('location')]",
        "dependsOn": [ 
