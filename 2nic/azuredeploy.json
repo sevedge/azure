@@ -248,12 +248,32 @@
           }
         }
       }
-    }
+    },
+    { 
+       "type": "Microsoft.Compute/virtualMachines/extensions", 
+       "name": "[concat(variables('vmName'),'/startup')]", 
+       "apiVersion": "2015-06-15", 
+       "location": "[variables('location')]",
+       "dependsOn": [ 
+         "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]" 
+       ], 
+       "properties": { 
+         "publisher": "Microsoft.OSTCExtensions",
+         "type": "CustomScriptForLinux",
+         "typeHandlerVersion": "1.2",
+         "settings": {
+           "fileUris": [
+             "https://github.com/sevedge/azure/blob/master/2nic/startup.sh"
+          ], 
+           "commandToExecute": "./startup.sh" 
+         } 
+       } 
+     } 
   ],
   "outputs": {
-    "sshCommand": {
+    "MGMT-URL": {
       "type": "string",
-      "value": "[concat('ssh ', parameters('adminUsername'), '@', parameters('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
+      "value": "[concat('https://', parameters('dnsLabelPrefix'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
     } 
   }
 }
