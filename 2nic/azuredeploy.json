@@ -248,27 +248,7 @@
           }
         }
       }
-    },
-    { 
-       "type": "Microsoft.Compute/virtualMachines/extensions", 
-       "name": "[concat(parameters('vmName'),'/configurenic')]", 
-       "apiVersion": "2015-06-15", 
-       "location": "[variables('location')]",
-       "dependsOn": [ 
-         "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]" 
-       ], 
-       "properties": { 
-         "publisher": "Microsoft.OSTCExtensions",
-         "type": "CustomScriptForLinux",
-         "typeHandlerVersion": "1.2",
-         "settings": {
-           "fileUris": [
-             "https://raw.githubusercontent.com/sevedge/azure/master/2nic/configurenic.sh"
-          ], 
-           "commandToExecute": "./configurenic.sh" 
-         } 
-       } 
-     } 
+    }
   ],
   "outputs": {
     "MGMT-URL": {
