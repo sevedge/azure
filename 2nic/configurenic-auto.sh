@@ -15,14 +15,14 @@
 ## Check bigstart tmm status in a while loop here instaed of a static sleep, but will use this for now
     sleep 180
 ## Create MGMT VLAN and IP and GW
-    tmsh create net vlan vlan_mgmt interfaces add { 1.0 { untagged }
+    tmsh create net vlan vlan_mgmt interfaces add { 1.0 { untagged } }
     tmsh create net self self_mgmt address $1/24 vlan vlan_mgmt allow-service default
     tmsh create net route default gw $2
 ## Create Traffic VLAN(s) and IP(s)
     int=1
     for nic in $3
         do
-            tmsh create net vlan vlan_$int interfaces add { 1.$int { untagged }
+            tmsh create net vlan vlan_$int interfaces add { 1.$int { untagged } }
             tmsh create net self self_$int address $nic/24 vlan vlan_$int allow-service default
             int=$((int+1))
         done 
