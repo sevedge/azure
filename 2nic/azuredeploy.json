@@ -263,7 +263,7 @@
          "typeHandlerVersion": "1.2",
          "settings": {
            "fileUris": [
-             "https://github.com/sevedge/azure/blob/master/2nic/startup.sh"
+             "https://raw.githubusercontent.com/sevedge/azure/master/2nic/startup.sh"
           ], 
            "commandToExecute": "./startup.sh" 
          } 
