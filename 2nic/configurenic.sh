@@ -18,3 +18,5 @@ echo "Starting NIC Configuration for 2 NIC Deployment" >> /var/log/onboardnic.lo
 
 #reboot
 echo "Ending NIC Configuration for 2 NIC Deployment" >> /var/log/onboardnic.log
+
+exit

@@ -65,6 +65,7 @@
 
     "nic1Name": "nic1",
     "nic2Name": "nic2",
+    "defaultgw": "10.0.1.1",
 
     "vnetName": "vnet",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
@@ -263,9 +264,9 @@
         "typeHandlerVersion": "1.2",
         "settings": {
           "fileUris": [
-            "https://raw.githubusercontent.com/sevedge/azure/master/2nic/configurenic.sh"
+            "https://raw.githubusercontent.com/sevedge/azure/master/2nic/configurenic-auto.sh"
         ], 
-          "commandToExecute": "./configurenic.sh" 
+          "commandToExecute": "[concat('./configurenic-auto.sh ', variables('subnet1PrivateAddress'), ' ', variables('defaultgw'), ' \"', variables('subnet1PrivateAddress'), '\"')]" 
         } 
       } 
     } 
