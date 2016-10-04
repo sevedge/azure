@@ -266,7 +266,7 @@
           "fileUris": [
             "https://raw.githubusercontent.com/sevedge/azure/master/2nic/configurenic-auto.sh"
         ], 
-          "commandToExecute": "[concat('./configurenic-auto.sh ', variables('subnet1PrivateAddress'), ' ', variables('defaultgw'), ' \"', variables('subnet1PrivateAddress'), '\"')]" 
+          "commandToExecute": "[concat('./configurenic-auto.sh ', variables('subnet1PrivateAddress'), ' ', variables('defaultgw'), ' \"', variables('subnet2PrivateAddress'), '\"')]" 
         } 
       } 
     } 
