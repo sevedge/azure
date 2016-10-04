@@ -56,7 +56,7 @@
     },
     "variables": {
         "location": "[resourceGroup().location]",
-        "vnetId": "[resourceId(variables('f5-market02'),'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+        "vnetId": "[resourceId(variables('location'),'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
         "subnetRef2": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName2'))]"
     },

@@ -163,34 +163,11 @@
       }
     },
     {
-      "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "[variables('apiVersion')]",
-      "dependsOn": [
-        "[variables('vnetId')]"
-      ],
-      "location": "[resourceGroup().location]",
-      "name": "[variables('nic2Name')]",
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig2",
-            "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              "subnet": {
-                "id": "[variables('subnet2Id')]"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
       "type": "Microsoft.Compute/virtualMachines",
       "apiVersion": "[variables('apiVersion')]",
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nic1Name'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nic2Name'))]"
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nic1Name'))]"
       ],
       "location": "[resourceGroup().location]",
       "name": "[parameters('vmName')]",
@@ -215,12 +192,6 @@
               "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic1Name'))]",
               "properties": {
                 "primary": true
-              }
-            },
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic2Name'))]",
-              "properties": {
-                "primary": false
               }
             }
           ]
