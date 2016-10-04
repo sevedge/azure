@@ -251,7 +251,7 @@
     },
     { 
        "type": "Microsoft.Compute/virtualMachines/extensions", 
-       "name": "[concat(parameters('vmName'),'/startup')]", 
+       "name": "[concat(parameters('vmName'),'/configurenic')]", 
        "apiVersion": "2015-06-15", 
        "location": "[variables('location')]",
        "dependsOn": [ 
@@ -263,9 +263,9 @@
          "typeHandlerVersion": "1.2",
          "settings": {
            "fileUris": [
-             "https://raw.githubusercontent.com/sevedge/azure/master/2nic/startup.sh"
+             "https://raw.githubusercontent.com/sevedge/azure/master/2nic/configurenic.sh"
           ], 
-           "commandToExecute": "sh startup.sh" 
+           "commandToExecute": "./configurenic.sh" 
          } 
        } 
      } 
