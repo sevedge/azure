@@ -113,12 +113,6 @@
             "properties": {
               "addressPrefix": "[variables('subnet1Prefix')]"
             }
-          },
-          {
-            "name": "[variables('subnet2Name')]",
-            "properties": {
-              "addressPrefix": "[variables('subnet2Prefix')]"
-            }
           }
         ]
       }
