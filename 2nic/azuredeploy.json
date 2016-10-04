@@ -265,7 +265,7 @@
            "fileUris": [
              "https://raw.githubusercontent.com/sevedge/azure/master/2nic/startup.sh"
           ], 
-           "commandToExecute": "./startup.sh" 
+           "commandToExecute": "sh startup.sh" 
          } 
        } 
      } 
