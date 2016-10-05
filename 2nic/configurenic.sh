@@ -7,7 +7,6 @@
 # Example for 3 nic: ./configurenic.sh 10.0.1.5 10.0.1.1 "10.0.2.5 10.0.3.5"
 
     echo "$(date +%c): Starting NIC Configuration for multi-NIC Deployment"
-
 ## Set DB Variables to allow for multi nic
     tmsh modify sys db provision.1nic value forced_enable
     tmsh modify sys db provision.1nicautoconfig value disable
@@ -20,7 +19,7 @@
             sleep 20
         done
     echo "$(date +%c): TMM Back UP"
-## Create MGMT VLAN and IP and GW
+## Create MGMT VLAN, IP and GW
     tmsh create net vlan vlan_mgmt interfaces add { 1.0 { untagged } }
     tmsh create net self self_mgmt address $1/24 vlan vlan_mgmt allow-service default
     tmsh create net route default gw $2
