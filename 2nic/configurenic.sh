@@ -12,7 +12,7 @@
     tmsh modify sys db provision.1nicautoconfig value disable
     bigstart restart
 ## Check bigstart tmm status in a while loop before moving on 
-    sleep 15
+    sleep 10
     while [[ $(bigstart status tmm) == *down* ]]
         do
             echo "$(date +%c): TMM Down..."
