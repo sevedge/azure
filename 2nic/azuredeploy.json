@@ -264,9 +264,9 @@
         "typeHandlerVersion": "1.2",
         "settings": {
           "fileUris": [
-            "https://raw.githubusercontent.com/sevedge/azure/master/2nic/configurenic-auto.sh"
+            "https://raw.githubusercontent.com/sevedge/azure/master/2nic/configurenic.sh"
         ], 
-          "commandToExecute": "[concat('./configurenic-auto.sh ', variables('subnet1PrivateAddress'), ' ', variables('defaultgw'), ' \"', variables('subnet2PrivateAddress'), '\"')]" 
+          "commandToExecute": "[concat('./configurenic.sh ', variables('subnet1PrivateAddress'), ' ', variables('defaultgw'), ' \"', variables('subnet2PrivateAddress'), '\"')]" 
         } 
       } 
     } 
