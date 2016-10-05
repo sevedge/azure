@@ -6,14 +6,20 @@
 # Parameter 3: List of Additional IP's
 # Example for 3 nic: ./configurenic.sh 10.0.1.5 10.0.1.1 "10.0.2.5 10.0.3.5"
 
-    echo "Starting NIC Configuration for multi-NIC Deployment"
+    echo "$(date +%c): Starting NIC Configuration for multi-NIC Deployment"
 
 ## Set DB Variables to allow for multi nic
     tmsh modify sys db provision.1nic value forced_enable
     tmsh modify sys db provision.1nicautoconfig value disable
     bigstart restart
-## Check bigstart tmm status in a while loop here instaed of a static sleep, but will use this for now
-    sleep 180
+## Check bigstart tmm status in a while loop before moving on 
+    sleep 15
+    while [[ $(bigstart status tmm) == *down* ]]
+        do
+            echo "$(date +%c): TMM Down..."
+            sleep 20
+        done
+    echo "$(date +%c): TMM Back UP"
 ## Create MGMT VLAN and IP and GW
     tmsh create net vlan vlan_mgmt interfaces add { 1.0 { untagged } }
     tmsh create net self self_mgmt address $1/24 vlan vlan_mgmt allow-service default
@@ -29,5 +35,5 @@
 
     tmsh save sys config
     #reboot , is this needed?
-    echo "Ending NIC Configuration for multi-NIC Deployment"
+    echo "$(date +%c): Ending NIC Configuration for multi-NIC Deployment"
     exit
