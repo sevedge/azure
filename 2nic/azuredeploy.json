@@ -63,11 +63,11 @@
     "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'samultinic')]",
     "storageAccountType": "Standard_LRS",
 
-    "nic1Name": "nic1",
-    "nic2Name": "nic2",
+    "nic1Name": "[concat(parameters('vmName'), '-mgmt1')]",
+    "nic2Name": "[concat(parameters('vmName'), '-nic2')]",
     "defaultgw": "10.0.1.1",
 
-    "vnetName": "[concat(parameters('vmName'), '_', 'vnet')]",
+    "vnetName": "[concat(parameters('vmName'), '-vnet')]",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
     "addressPrefix": "10.0.0.0/16",
 
@@ -148,7 +148,7 @@
       "properties": {
         "ipConfigurations": [
           {
-            "name": "ipconfig1",
+            "name": "[concat(parameters('vmName'), '-ipconfig1')]",
             "properties": {
               "privateIPAddress": "[variables('subnet1PrivateAddress')]",
               "privateIPAllocationMethod": "Static",
@@ -174,7 +174,7 @@
       "properties": {
         "ipConfigurations": [
           {
-            "name": "ipconfig2",
+            "name": "[concat(parameters('vmName'), '-ipconfig2')]",
             "properties": {
               "privateIPAddress": "[variables('subnet2PrivateAddress')]",
               "privateIPAllocationMethod": "Static",
