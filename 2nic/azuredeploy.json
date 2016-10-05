@@ -67,7 +67,7 @@
     "nic2Name": "nic2",
     "defaultgw": "10.0.1.1",
 
-    "vnetName": "vnet",
+    "vnetName": "[concat(parameters('vmName'), '_', 'vnet')]",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
     "addressPrefix": "10.0.0.0/16",
 
