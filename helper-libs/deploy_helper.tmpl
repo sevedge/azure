@@ -17,17 +17,17 @@ sys application template f5.deploy_helper {
             }
             implementation {
 
-##########################################################################################################################################################
-## Example call to REST API to instantiate this iApp, there is no presentation so passing in specific									   				##
-## variables which are called at the start of the template																				   				##	
-##													  																					   				
-## curl -sku admin:admin-X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/application/service/ \				   				
-## -d '{"name":"'"$appname"'","partition":"Common","strictUpdates":"disabled","template":"/Common/f5.deploy_helper",\					   				
-## "trafficGroup":"none","lists":[],"variables":[{"name":"variables__deployment","encrypted":"no","value":"'"$deployment"'"},\			   			
-## {"name":"variables__type","encrypted":"no","value":"'"$type"'"},{"name":"variables__level","encrypted":"no","value":"'"$level"'"},\ 	   				
-## {"name":"variables__asm_policy","encrypted":"no","value":"'"$asm_policy"'"},{"name":"variables__custom_asm_policy","encrypted":"no","value":"'"$custom_asm_policy"'"}]}'
-## 																																		   				##	
-##########################################################################################################################################################
+##################################################################################################################################################################
+## Example call to REST API to instantiate this iApp, there is no presentation so passing in specific									   						##
+## variables which are called at the start of the template																				   						##	
+##													  																					   						##
+##	curl -sku admin:admin-X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/application/service/ -d \									##
+## '{"name":"'"$appname"'","partition":"Common","strictUpdates":"disabled","template":"/Common/f5.deploy_helper","trafficGroup":"none","lists":[],\				##
+## "variables":[{"name":"variables__deployment","encrypted":"no","value":"'"$deployment"'"},{"name":"variables__type","encrypted":"no","value":"'"$type"'"},\	##
+## {"name":"variables__level","encrypted":"no","value":"'"$level"'"},{"name":"variables__asm_policy","encrypted":"no","value":"'"$asm_policy"'"},\				##
+## {"name":"variables__custom_asm_policy","encrypted":"no","value":"'"$custom_asm_policy"'"}]}' | jq .															##
+## 																																		   						##	
+##################################################################################################################################################################
 	
 	tmsh::include f5.iapp.1.5.2.cli
 	
@@ -40,23 +40,23 @@ sys application template f5.deploy_helper {
 		set asm_level "$custom_asm_policy low medium high"
 		foreach unique_level $asm_level {
 			switch $unique_level {
-				low { set asm_name $deployment-$type-$unique_level ; set asm_url $asm_policy }
-				medium { set asm_name $deployment-$type-$unique_level ; set asm_url $asm_policy }
-				high { set asm_name $deployment-$type-$unique_level ; set asm_url $asm_policy }
+				low { set asm_name $deployment-$type-$unique_level ; set asm_url "${asm_policy}-${type}-${unique_level}.xml" }
+				medium { set asm_name $deployment-$type-$unique_level ; set asm_url "${asm_policy}-${type}-${unique_level}.xml" }
+				high { set asm_name $deployment-$type-$unique_level ; set asm_url "${asm_policy}-${type}-${unique_level}.xml" }
 				default { set asm_name "custom-asm-policy" ; set asm_url $custom_asm_policy}
 			}
-
+			if { $unique_level == "none" } { continue }
+			
 			puts "Deploying... Downloading ASM Policy: $asm_url"
-			if { $asm_name == "none" } { continue }
 			#Download ASM asm_policy, load it and then delete the xml file off disk
 			if { [catch { exec /usr/bin/curl -s -k $asm_url --retry 3 -o /tmp/${tmsh::app_name}-${asm_name}.xml } err] } {
-					error "Unable to Download ASM asm_policy - URL: $asm_policy Error: $err"
+					error "Unable to Download ASM policy - URL: $asm_url Error: $err"
 			}
 
 			puts "Deploying... Creating ASM Policy: /Common/${tmsh::app_name}-${asm_name}-security_policy"
 			tmsh_exe "load asm policy /Common/${tmsh::app_name}-${asm_name}-security_policy overwrite file /tmp/${tmsh::app_name}-${asm_name}.xml"
 			 if { [catch { exec /bin/rm -f /tmp/${tmsh::app_name}-${asm_name}.xml } err] } {
-					 puts "Unable to Delete ASM asm_policy - Error: $err"
+					 puts "Unable to Delete ASM policy - FILE: /tmp/${tmsh::app_name}-${asm_name}.xml Error: $err"
 			 }
 
 			#Set asm asm_policy to active and blocking
@@ -72,7 +72,7 @@ sys application template f5.deploy_helper {
 	set deployment [expr { [info exists ::variables__deployment] ? "$::variables__deployment" : "f5.deployment" }]
 	set type [expr { [info exists ::variables__type] ? "$::variables__type" : "linux" }]
 	set level [expr { [info exists ::variables__level] ? "$::variables__level" : "medium" }]
-	set asm_policy [expr { [info exists ::variables__asm_policy] ? "$::variables__asm_policy" : "https://cdn.f5.com/product/blackbox/azure/asm-policy-$type-$level.xml" }]
+	set asm_policy [expr { [info exists ::variables__asm_policy] ? "$::variables__asm_policy" : "https://cdn.f5.com/product/blackbox/azure/asm-policy" }]
 	set custom_asm_policy [expr { [info exists ::variables__custom_asm_policy] ? "$::variables__custom_asm_policy" : "none" }]
 	
 	#Run proc to download and deploy ASM
@@ -81,14 +81,16 @@ sys application template f5.deploy_helper {
 	#Create ltm policy, check if custom policy was requested
 	if {$is_v12_1} { set legacy "legacy" }
 	if {$custom_asm_policy == "none"} { 
+		puts "Deploying... Creating LTM Policy: /Common/${tmsh::app_name}-$deployment-$type-$level-ltm_policy"
 		iapp::conf create ltm policy /Common/${tmsh::app_name}-$deployment-$type-$level-ltm_policy $legacy controls replace-all-with \{ asm \} requires replace-all-with \{ http \} \
 		rules replace-all-with \{ default \{ actions replace-all-with \{ 0 \{ asm enable policy /Common/${tmsh::app_name}-$deployment-$type-$level-security_policy \} \} ordinal 1 \} \} strategy first-match app-service none
 	} else {
+		puts "Deploying... Creating LTM Policy: /Common/${tmsh::app_name}-custom-asm-policy-ltm_policy"
 		iapp::conf create ltm policy /Common/${tmsh::app_name}-custom-asm-policy-ltm_policy $legacy controls replace-all-with \{ asm \} requires replace-all-with \{ http \} \
 		rules replace-all-with \{ default \{ actions replace-all-with \{ 0 \{ asm enable policy /Common/${tmsh::app_name}-custom-asm-policy-security_policy \} \} ordinal 1 \} \} strategy first-match app-service none
 	}
 
-	
+	puts "Deploying... Finished."
 	iapp::template stop
             }
             presentation {
