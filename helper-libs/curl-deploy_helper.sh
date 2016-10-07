@@ -20,7 +20,7 @@ fi
 if [ $CMD == "POST" ]
 	then
 	echo "Creating $APPNAME..."
-	curl -sku admin:admin-X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/application/service/ -d '{"name":"'"$APPNAME"'","partition":"Common","strictUpdates":"disabled","template":"/Common/f5.deploy_helper","trafficGroup":"none","lists":[],"variables":[{"name":"variables__deployment","encrypted":"no","value":"'"$deployment"'"},{"name":"variables__type","encrypted":"no","value":"'"$type"'"},{"name":"variables__level","encrypted":"no","value":"'"$level"'"},{"name":"variables__asm_policy","encrypted":"no","value":"'"$asm_policy"'"},{"name":"variables__custom_asm_policy","encrypted":"no","value":"'"$custom_asm_policy"'"}]}' | jq .
+	curl -sku admin:admin-X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/application/service/ -d '{"name":"'"$APPNAME"'","partition":"Common","strictUpdates":"disabled","template":"/Common/f5.policy_creator_beta","trafficGroup":"none","lists":[],"variables":[{"name":"variables__deployment","encrypted":"no","value":"'"$deployment"'"},{"name":"variables__type","encrypted":"no","value":"'"$type"'"},{"name":"variables__level","encrypted":"no","value":"'"$level"'"},{"name":"variables__asm_policy","encrypted":"no","value":"'"$asm_policy"'"},{"name":"variables__custom_asm_policy","encrypted":"no","value":"'"$custom_asm_policy"'"}]}' | jq .
 fi
 if [ $CMD == "DELETE" ]
 	then
