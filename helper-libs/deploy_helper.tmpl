@@ -1,0 +1,145 @@
+# Copyright 2016. F5 Networks, Inc. See End User License Agreement (EULA) for
+# license terms. Notwithstanding anything to the contrary in the EULA, Licensee
+# may copy and modify this software product for its internal business purposes.
+# Further, Licensee may upload, publish and distribute the modified version of
+# the software product on devcentral.f5.com.
+
+
+
+
+sys application template f5.deploy_helper {
+    actions {
+        definition {
+            html-help {
+<p><strong>Deployment Helper iApp Template</strong></p>
+
+<p>This template creates a set of configuration objects to be consumed </p>
+            }
+            implementation {
+
+#############################################################################################################################################
+## Example call to REST API to instantiate this iApp, there is no presentation so passing in specific									   ##
+## variables which are called at the start of the template																				   ##	
+##													  																					   ##
+## curl -sku admin:admin-X POST -H "Content-Type: application/json" https://localhost/mgmt/tm/sys/application/service/ \				   ##	
+## -d '{"name":"'"$appname"'","partition":"Common","strictUpdates":"disabled","template":"/Common/f5.deploy_helper",\					   ##	
+## "trafficGroup":"none","lists":[],"variables":[{"name":"variables__deployment","encrypted":"no","value":"'"$deployment"'"},\			   ##
+## {"name":"variables__type","encrypted":"no","value":"'"$type"'"},{"name":"variables__level","encrypted":"no","value":"'"$level"'"},\ 	   ##
+## {"name":"variables__policy","encrypted":"no","value":"'"$asm_policy"'"}]}' 															   ##
+## 																																		   ##	
+#############################################################################################################################################
+	
+	tmsh::include f5.iapp.1.5.2.cli
+	
+	proc tmsh_exe {command} {
+		#this proc gives us the ability to do commands outside the context of the iApp
+		exec /usr/bin/tmsh -c $command
+	}
+	
+	proc deploy_asm {deployment type asm_policy custom_asm_policy} {
+		set asm_level "$custom_asm_policy low medium high"
+		foreach unique_level $asm_level {
+			switch $unique_level {
+				low { set asm_name $deployment-$type-$unique_level ; set asm_url $asm_policy }
+				medium { set asm_name $deployment-$type-$unique_level ; set asm_url $asm_policy }
+				high { set asm_name $deployment-$type-$unique_level ; set asm_url $asm_policy }
+				default { set asm_name $custom_asm_policy ; set asm_url $custom_asm_policy}
+			}
+			if { $asm_name == "none" } { continue }
+			#Download ASM asm_policy, load it and then delete the xml file off disk
+			if { [catch { exec /usr/bin/curl -s -k $asm_url --retry 3 -o /tmp/${tmsh::app_name}-${asm_name}.xml } err] } {
+					error "Unable to Download ASM asm_policy - URL: $asm_policy Error: $err"
+			}
+			puts "Testing: tmsh_exe load asm policy /Common/${tmsh::app_name}-${asm_name}-security_policy overwrite file /tmp/${tmsh::app_name}-${asm_name}.xml"
+			tmsh_exe "load asm policy /Common/${tmsh::app_name}-${asm_name}-security_policy overwrite file /tmp/${tmsh::app_name}-${asm_name}.xml"
+			 if { [catch { exec /bin/rm -f /tmp/${tmsh::app_name}-${asm_name}.xml } err] } {
+					 puts "Unable to Delete ASM asm_policy - Error: $err"
+			 }
+
+			#Set asm asm_policy to active and blocking
+			tmsh_exe "modify asm policy /Common/${tmsh::app_name}-${asm_name}-security_policy active blocking-mode enabled"
+		}
+	}
+	
+	iapp::template start
+
+	#Set variables, if they dont exist then use defaults
+	set deployment [expr { [info exists ::variables__deployment] ? "$::variables__deployment" : "f5.deployment" }]
+	set type [expr { [info exists ::variables__type] ? "$::variables__type" : "linux" }]
+	set level [expr { [info exists ::variables__level] ? "$::variables__level" : "medium" }]
+	set asm_policy [expr { [info exists ::variables__asm_policy] ? "$::variables__asm_policy" : "https://cdn.f5.com/product/blackbox/azure/asm-policy-$type-$level.xml" }]
+	set custom_asm_policy [expr { [info exists ::variables__custom_asm_policy] ? "$::variables__custom_asm_policy" : "none" }]
+	
+	#Run proc to download and deploy ASM
+    deploy_asm $deployment $type $asm_policy $custom_asm_policy
+	
+	#Create ltm policy, check if custom policy was requested
+	if {$custom_asm_policy == "none"} { 
+		iapp::conf create ltm policy /Common/${tmsh::app_name}-$deployment-$type-$level-ltm_policy controls replace-all-with \{ asm \} requires replace-all-with \{ http \} \
+		rules replace-all-with \{ default \{ actions replace-all-with \{ 0 \{ asm enable policy /Common/${tmsh::app_name}-$deployment-$type-$level-security_policy \} \} ordinal 1 \} \} strategy first-match app-service none
+	} else {
+		iapp::conf create ltm policy /Common/${tmsh::app_name}-$custom_asm_policy-ltm_policy controls replace-all-with \{ asm \} requires replace-all-with \{ http \} \
+		rules replace-all-with \{ default \{ actions replace-all-with \{ 0 \{ asm enable policy /Common/${tmsh::app_name}-$custom_asm_policy-security_policy \} \} ordinal 1 \} \} strategy first-match app-service none
+	}
+
+	
+	iapp::template stop
+            }
+            presentation {
+
+include "/Common/f5.apl_common"
+
+section intro {
+
+        # APL choice values may be set even if the optional
+        # clause is not true. This trick is useful for setting
+        # values that APL otherwise would not have access to.
+        # Here, system provisioning values are recalled, and later
+        # used to customize messages displayed within the template.
+        optional ( "HIDE" == "THIS" ) {
+            choice am_provisioned tcl {
+                return [expr {[tmsh::run_proc f5.iapp.1.5.2.cli:iapp_get_provisioned am] ? "yes" : "no"}]
+            }
+            choice apm_provisioned tcl {
+                return [expr {[tmsh::run_proc f5.iapp.1.5.2.cli:iapp_get_provisioned apm] ? "yes" : "no"}]
+            }
+            choice asm_provisioned tcl {
+                return [expr {[tmsh::run_proc f5.iapp.1.5.2.cli:iapp_get_provisioned asm] ? "yes" : "no"}]
+            }
+            choice asm_policy tcl {
+                 return [expr {[tmsh::run_proc f5.iapp.1.5.2.cli:iapp_get_items -nocomplain -filter controls =~ asm ltm asm_policy] ne "" ? "yes" : "no"}]
+            }
+            choice afm_allowed tcl {
+                return [expr { [tmsh::run_proc f5.iapp.1.5.2.cli:iapp_get_provisioned afm] ? "yes" : "no"}]
+            }
+            choice analytics_provisioned tcl {
+                return [expr {[tmsh::run_proc f5.iapp.1.5.2.cli:iapp_get_provisioned avr] ? "yes" : "no"}]
+            }
+            choice is_admin tcl {
+                return [expr { [tmsh::run_proc f5.iapp.1.5.2.cli:iapp_get_user -is_admin] ? "yes" : "no"}]
+            }
+            choice is_v11_4 tcl {
+                return [expr {[tmsh::run_proc f5.iapp.1.5.2.cli:iapp_tmos_version >= 11.4] ? "yes" : "no"}]
+            }
+            choice is_v11_6 tcl {
+                return [expr {[tmsh::run_proc f5.iapp.1.5.2.cli:iapp_tmos_version >= 11.6] ? "yes" : "no"}]
+            }
+            choice is_v13_0 tcl {
+                return [expr {[tmsh::run_proc f5.iapp.1.5.2.cli:iapp_tmos_version >= 13.0] ? "yes" : "no"}]
+            }
+        }
+    }
+	text {
+
+		intro "Helper iApp"
+		
+	}
+            }
+            role-acl { admin manager resource-admin }
+            run-as none
+        }
+    }
+    requires-bigip-version-max none
+    requires-bigip-version-min 12.0
+    requires-modules { }
+}
